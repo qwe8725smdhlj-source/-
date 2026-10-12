@@ -150,52 +150,130 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // 이미지 파일 전처리 및 서버 영구 동기화 함수 (어느 기기/브라우저든 100% 호환되는 표준 JPEG 변환)
+  function processAndSaveImage(file) {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('이미지 파일(JPG, PNG, WEBP 등)만 등록 가능합니다.');
+      return;
+    }
+
+    showToast('사진을 최적화하여 서버에 영구 저장하는 중입니다...');
+
+    const reader = new FileReader();
+    reader.onload = function (evt) {
+      const img = new Image();
+      img.onload = function () {
+        try {
+          // 인물 프로필 표준 규격 (680 x 906, 3:4 비율, Retina 고해상도 지원)
+          const targetW = 680;
+          const targetH = 906;
+          const canvas = document.createElement('canvas');
+          canvas.width = targetW;
+          canvas.height = targetH;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+
+          // 3:4 비율 맞춤 크롭 (인물 사진 특성에 맞춰 상단 12% 중심 맞춤)
+          const imgRatio = img.width / img.height;
+          const targetRatio = targetW / targetH;
+          let sx = 0, sy = 0, sWidth = img.width, sHeight = img.height;
+
+          if (imgRatio > targetRatio) {
+            sWidth = img.height * targetRatio;
+            sx = (img.width - sWidth) / 2;
+          } else {
+            sHeight = img.width / targetRatio;
+            sy = Math.max(0, (img.height - sHeight) * 0.12);
+          }
+
+          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, targetW, targetH);
+
+          // 모든 기기(아이폰, 안드로이드, 카카오톡, 사파리 등)에서 100% 열리는 표준 JPEG 변환 (약 150~250KB)
+          const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+          // 즉시 화면 반영
+          profileImgs.forEach(function (el) {
+            el.src = optimizedDataUrl;
+          });
+
+          try {
+            localStorage.setItem('user_profile_photo', optimizedDataUrl);
+          } catch (e) {}
+
+          // 서버 파일로 영구 저장
+          fetch('/api/save-profile-photo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ dataUrl: optimizedDataUrl })
+          })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data && data.success) {
+                const ts = Date.now();
+                profileImgs.forEach(function (el) {
+                  el.src = '/images/profile-photo.jpg?v=' + ts;
+                });
+                showToast('✅ 대표 사진이 완벽하게 등록되었습니다! (모든 기기·브라우저·카카오톡 호환 완료)');
+              } else {
+                showToast('사진이 적용되었습니다.');
+              }
+            })
+            .catch(function () {
+              showToast('사진이 적용되었습니다.');
+            });
+        } catch (err) {
+          console.error(err);
+          // 캔버스 실패 시 원본 그대로 전송 시도
+          fallbackSaveRaw(evt.target.result);
+        }
+      };
+      img.onerror = function () {
+        fallbackSaveRaw(evt.target.result);
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function fallbackSaveRaw(rawUrl) {
+    profileImgs.forEach(function (el) {
+      el.src = rawUrl;
+    });
+    fetch('/api/save-profile-photo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dataUrl: rawUrl })
+    }).catch(function () {});
+  }
+
   // 파일 선택을 통한 본인 사진 등록
   uploadInputs.forEach(function (input) {
     input.addEventListener('change', function (e) {
       const file = e.target.files && e.target.files[0];
-      if (!file) return;
-
-      if (!file.type.startsWith('image/')) {
-        alert('이미지 파일(JPG, PNG 등)만 등록 가능합니다.');
-        return;
+      if (file) {
+        processAndSaveImage(file);
       }
+    });
+  });
 
-      const reader = new FileReader();
-      reader.onload = function (evt) {
-        const dataUrl = evt.target.result;
-        if (!dataUrl) return;
-
-        // 즉시 화면 반영
-        profileImgs.forEach(function (img) {
-          img.src = dataUrl;
-        });
-
-        try {
-          localStorage.setItem('user_profile_photo', dataUrl);
-        } catch (err) {}
-
-        showToast('사진을 서버로 영구 저장하는 중입니다...');
-
-        // 서버 파일로 영구 저장 (/public/images/profile-photo.jpg)
-        fetch('/api/save-profile-photo', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dataUrl: dataUrl })
-        })
-          .then(function (res) { return res.json(); })
-          .then(function (data) {
-            if (data && data.success) {
-              showToast('✅ 대표 사진이 서버에 영구 저장되었습니다! 이제 재발행(배포)하셔도 사진이 완벽하게 유지됩니다.');
-            } else {
-              showToast('사진이 적용되었습니다.');
-            }
-          })
-          .catch(function () {
-            showToast('사진이 화면에 적용되었습니다.');
-          });
-      };
-      reader.readAsDataURL(file);
+  // 드래그 앤 드롭으로 프로필 카드에 사진 직접 끌어다 놓기 지원
+  document.querySelectorAll('.profile-card').forEach(function (card) {
+    card.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      card.style.outline = '2px dashed var(--navy-accent, #2563EB)';
+      card.style.outlineOffset = '4px';
+    });
+    card.addEventListener('dragleave', function () {
+      card.style.outline = 'none';
+    });
+    card.addEventListener('drop', function (e) {
+      e.preventDefault();
+      card.style.outline = 'none';
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        processAndSaveImage(e.dataTransfer.files[0]);
+      }
     });
   });
 

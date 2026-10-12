@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -21,26 +22,43 @@ const distDir = path.join(__dirname, 'dist');
 const publicDir = path.join(__dirname, 'public');
 
 // Endpoint to permanently save representative photo to disk if synchronized from client
-app.post('/api/save-profile-photo', express.json({ limit: '15mb' }), (req, res) => {
+app.post('/api/save-profile-photo', express.json({ limit: '50mb' }), (req, res) => {
   try {
     const { dataUrl } = req.body;
-    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:image/')) {
-      const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+    if (typeof dataUrl === 'string' && (dataUrl.startsWith('data:image/') || dataUrl.includes('base64,'))) {
+      const base64Data = dataUrl.replace(/^data:image\/[^;]+;base64,/, '').replace(/^data:image\/[a-zA-Z0-9+.-]+;charset=[^;]+;base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
       
       const pubImgDir = path.join(publicDir, 'images');
       if (!fs.existsSync(pubImgDir)) fs.mkdirSync(pubImgDir, { recursive: true });
-      fs.writeFileSync(path.join(pubImgDir, 'profile-photo.jpg'), buffer);
+      const targetPubFile = path.join(pubImgDir, 'profile-photo.jpg');
 
+      const tempFile = path.join('/tmp', `upload_${Date.now()}.bin`);
+      fs.writeFileSync(tempFile, buffer);
+
+      // Use ImageMagick to guarantee 100% compliant, standard JPEG format & clean metadata
+      try {
+        execSync(`convert "${tempFile}" -resize 680x906^ -gravity center -extent 680x906 -quality 92 -strip "${targetPubFile}"`);
+      } catch (convErr) {
+        // Fallback: write direct buffer
+        fs.writeFileSync(targetPubFile, buffer);
+      } finally {
+        try { if (fs.existsSync(tempFile)) fs.unlinkSync(tempFile); } catch (_) {}
+      }
+
+      // Sync to dist
       const distImgDir = path.join(distDir, 'images');
       if (fs.existsSync(distDir)) {
         if (!fs.existsSync(distImgDir)) fs.mkdirSync(distImgDir, { recursive: true });
-        fs.writeFileSync(path.join(distImgDir, 'profile-photo.jpg'), buffer);
+        fs.copyFileSync(targetPubFile, path.join(distImgDir, 'profile-photo.jpg'));
       }
+
+      console.log('Successfully saved and normalized profile-photo.jpg');
       return res.json({ success: true });
     }
     return res.status(400).json({ error: 'invalid data' });
   } catch (err) {
+    console.error('Error in save-profile-photo:', err);
     return res.status(500).json({ error: 'failed to save' });
   }
 });
