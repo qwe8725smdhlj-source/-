@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>대표 사진 등록 및 영구 저장소 | 김병수 손해사정사무소</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR", sans-serif;
+      background: #F8FAFC;
+      color: #0F172A;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px 16px;
+    }
+    .card {
+      background: #FFFFFF;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 520px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0F2444;
+      margin-bottom: 8px;
+    }
+    p.desc {
+      font-size: 14px;
+      color: #64748B;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    .dropzone {
+      border: 2px dashed #3B82F6;
+      background: #EFF6FF;
+      border-radius: 12px;
+      padding: 36px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    .dropzone:hover, .dropzone.dragover {
+      background: #DBEAFE;
+      border-color: #1D4ED8;
+    }
+    .dropzone svg {
+      color: #2563EB;
+    }
+    .dropzone-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1E3A66;
+    }
+    .dropzone-subtext {
+      font-size: 12.5px;
+      color: #64748B;
+    }
+    .preview-wrap {
+      display: none;
+      margin-bottom: 20px;
+      flex-direction: column;
+      align-items: center;
+    }
+    .preview-img {
+      width: 200px;
+      height: 266px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border: 3px solid #1E3A66;
+    }
+    .btn-save {
+      display: none;
+      width: 100%;
+      padding: 14px;
+      background: #1E3A66;
+      color: #FFFFFF;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-bottom: 12px;
+    }
+    .btn-save:hover {
+      background: #0F2444;
+    }
+    .status-box {
+      display: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 16px;
+      line-height: 1.5;
+    }
+    .status-success {
+      background: #DCFCE7;
+      color: #15803D;
+      border: 1px solid #86EFAC;
+    }
+    .link-home {
+      display: inline-block;
+      margin-top: 20px;
+      color: #2563EB;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .link-home:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>📷 대표 사진 영구 등록소</h1>
+    <p class="desc">
+      첨부하셨던 <strong>김병수 손해사정사님의 사진 파일</strong>을 선택하시면<br />
+      서버 원본 및 배포 번들에 영구 저장되어 재발행 시 100% 정상 반영됩니다.
+    </p>
+
+    <div class="dropzone" id="dropzone">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" y1="3" x2="12" y2="15"></line>
+      </svg>
+      <div class="dropzone-text">사진 파일을 여기로 끌어다 놓으세요</div>
+      <div class="dropzone-subtext">또는 클릭하여 파일 선택 (PNG, JPG, 스마트폰 사진 등)</div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none;" />
+    </div>
+
+    <div class="preview-wrap" id="previewWrap">
+      <p style="font-size: 13px; font-weight: 600; color: #1E3A66; margin-bottom: 8px;">선택된 사진 미리보기 (웹 표준 3:4 규격)</p>
+      <img id="previewImg" class="preview-img" alt="미리보기" />
+    </div>
+
+    <button type="button" class="btn-save" id="saveBtn">서버에 영구 저장하기</button>
+
+    <div class="status-box status-success" id="statusBox"></div>
+
+    <a href="/" class="link-home">← 김병수 손해사정사무소 메인 홈페이지로 이동</a>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const previewWrap = document.getElementById('previewWrap');
+    const previewImg = document.getElementById('previewImg');
+    const saveBtn = document.getElementById('saveBtn');
+    const statusBox = document.getElementById('statusBox');
+
+    let currentOptimizedDataUrl = null;
+
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        alert('이미지 파일(JPG, PNG 등)만 등록 가능합니다.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const img = new Image();
+        img.onload = function() {
+          const targetW = 680;
+          const targetH = 906;
+          const canvas = document.createElement('canvas');
+          canvas.width = targetW;
+          canvas.height = targetH;
+          const ctx = canvas.getContext('2d');
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+
+          const imgRatio = img.width / img.height;
+          const targetRatio = targetW / targetH;
+          let sx = 0, sy = 0, sWidth = img.width, sHeight = img.height;
+
+          if (imgRatio > targetRatio) {
+            sWidth = img.height * targetRatio;
+            sx = (img.width - sWidth) / 2;
+          } else {
+            sHeight = img.width / targetRatio;
+            sy = Math.max(0, (img.height - sHeight) * 0.12);
+          }
+
+          ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, targetW, targetH);
+          currentOptimizedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+          previewImg.src = currentOptimizedDataUrl;
+          previewWrap.style.display = 'flex';
+          saveBtn.style.display = 'block';
+
+          // 자동 즉시 저장
+          saveToServer(currentOptimizedDataUrl);
+        };
+        img.src = evt.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    saveBtn.addEventListener('click', () => {
+      if (currentOptimizedDataUrl) {
+        saveToServer(currentOptimizedDataUrl);
+      }
+    });
+
+    function saveToServer(dataUrl) {
+      statusBox.style.display = 'block';
+      statusBox.className = 'status-box';
+      statusBox.style.background = '#EFF6FF';
+      statusBox.style.color = '#1E3A66';
+      statusBox.style.border = '1px solid #BFDBFE';
+      statusBox.innerText = '서버에 영구 기록 중입니다...';
+
+      fetch('/api/save-profile-photo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dataUrl: dataUrl })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.success) {
+          try { localStorage.setItem('user_profile_photo', dataUrl); } catch(e) {}
+          statusBox.className = 'status-box status-success';
+          statusBox.innerHTML = '✅ <strong>사진이 서버 원본에 영구 저장되었습니다!</strong><br />이제 상단의 <strong>[재발행(배포)]</strong> 버튼을 누르시면 어느 경로에서든 사진이 완벽하게 열립니다.<br /><br /><a href="/" style="color:#15803D; font-weight:800; text-decoration:underline;">👉 홈페이지 메인 화면에서 확인하기</a>';
+        } else {
+          statusBox.innerText = '저장 실패: ' + (data.error || '오류');
+        }
+      })
+      .catch(err => {
+        statusBox.innerText = '통신 오류가 발생했습니다.';
+      });
+    }
+  </script>
+</body>
+</html>

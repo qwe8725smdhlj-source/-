@@ -209,6 +209,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // 관리용 사진 등록 박스 숨기기 버튼
+  document.querySelectorAll('.photo-admin-hide-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.photo-admin-box').forEach(function (box) {
+        box.style.display = 'none';
+      });
+      showToast('등록 박스가 숨겨졌습니다. (배포 시 방문자에게 보이지 않습니다)');
+    });
+  });
+
   // 드래그 앤 드롭으로 프로필 카드에 사진 직접 끌어다 놓기 지원
   document.querySelectorAll('.profile-card').forEach(function (card) {
     card.addEventListener('dragover', function (e) {
