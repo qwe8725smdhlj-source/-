@@ -1,12 +1,13 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // Disable all caching for instant updates in preview
 app.use((_req, res, next) => {
@@ -16,16 +17,54 @@ app.use((_req, res, next) => {
   next();
 });
 
-// Serve public directory statically
-app.use(express.static(path.join(__dirname, 'public'), {
+const distDir = path.join(__dirname, 'dist');
+const publicDir = path.join(__dirname, 'public');
+
+if (fs.existsSync(distDir)) {
+  app.use(express.static(distDir, {
+    etag: false,
+    lastModified: false,
+    maxAge: 0,
+  }));
+}
+
+app.use(express.static(publicDir, {
   etag: false,
   lastModified: false,
   maxAge: 0,
 }));
 
+// Route fallback for clean URLs
+app.get('*', (req, res, next) => {
+  const cleanPath = req.path.replace(/^\//, '').replace(/\/$/, '');
+  if (!cleanPath) {
+    return next();
+  }
+  const candidateFiles = [
+    path.join(publicDir, cleanPath, 'index.html'),
+    path.join(distDir, cleanPath, 'index.html'),
+    path.join(publicDir, cleanPath + '.html'),
+    path.join(distDir, cleanPath + '.html'),
+  ];
+  for (const file of candidateFiles) {
+    if (fs.existsSync(file)) {
+      return res.sendFile(file);
+    }
+  }
+  next();
+});
+
 // 404 handler
 app.use((_req, res) => {
-  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+  const notFoundFile = fs.existsSync(path.join(publicDir, '404.html'))
+    ? path.join(publicDir, '404.html')
+    : (fs.existsSync(path.join(distDir, '404.html')) ? path.join(distDir, '404.html') : null);
+  
+  if (notFoundFile) {
+    res.status(404).sendFile(notFoundFile);
+  } else {
+    res.status(404).send('Page not found');
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
