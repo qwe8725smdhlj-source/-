@@ -482,28 +482,36 @@ section {
 
 /* 사용자 본인 사진 직접 업로드/선택 인터랙션 버튼 */
 .profile-photo-actions {
-  display: flex;
+  display: flex !important;
   justify-content: center;
+  align-items: center;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: 12px;
+  padding: 6px;
+  width: 100%;
 }
 
 .profile-upload-label {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--navy);
-  background: var(--navy-soft);
-  border: 1px solid var(--navy-border);
-  padding: 6px 12px;
-  border-radius: 6px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #FFFFFF !important;
+  background: #1E3A66 !important;
+  border: 1px solid #0F2444;
+  padding: 8px 14px;
+  border-radius: 8px;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(15, 36, 68, 0.25);
+  transition: all 0.2s ease;
 }
 
 .profile-upload-label:hover {
-  background: #E2EBF5;
+  background: #0F2444 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 36, 68, 0.3);
 }
 
 .profile-reset-btn {
@@ -520,19 +528,21 @@ section {
 .profile-hide-btn {
   display: inline-flex;
   align-items: center;
-  font-size: 11.5px;
-  color: var(--text-muted);
-  background: #F1F5F9;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569 !important;
+  background: #F1F5F9 !important;
   border: 1px solid #CBD5E1;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .profile-hide-btn:hover {
-  background: #E2E8F0;
-  color: var(--text-dark);
+  background: #E2E8F0 !important;
+  color: #0F172A !important;
 }
 
 /* --------------------------------------------------------------------------

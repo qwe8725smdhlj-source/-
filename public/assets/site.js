@@ -95,14 +95,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const hideBtns = document.querySelectorAll('.profile-hide-btn');
   const photoActionBars = document.querySelectorAll('.profile-photo-actions');
 
-  // 버튼 숨김 상태 복원
-  try {
-    if (localStorage.getItem('hide_profile_upload_btn') === 'true') {
-      photoActionBars.forEach(function (bar) {
-        bar.style.display = 'none';
-      });
-    }
-  } catch (e) {}
+  // 버튼을 항상 기본 표시 (사용자가 직접 클릭하여 숨길 때만 숨김)
+  photoActionBars.forEach(function (bar) {
+    bar.style.display = 'flex';
+  });
 
   // 버튼 숨기기 클릭 이벤트
   hideBtns.forEach(function (btn) {
@@ -111,35 +107,17 @@ document.addEventListener('DOMContentLoaded', function () {
       photoActionBars.forEach(function (bar) {
         bar.style.display = 'none';
       });
-      try {
-        localStorage.setItem('hide_profile_upload_btn', 'true');
-      } catch (err) {}
-      showToast('등록 버튼이 숨겨졌습니다. (다시 보이게 하려면 사진을 더블클릭하세요)');
+      showToast('등록 버튼이 숨겨졌습니다. (사진을 클릭하시면 다시 등록창이 열립니다)');
     });
   });
 
-  // 사진 영역 더블클릭 시 숨겨진 등록 버튼 다시 표시 토글
+  // 사진 영역 클릭 시 파일 등록 창 바로 열기 지원
   profileImgs.forEach(function (img) {
     img.style.cursor = 'pointer';
-    img.title = '클릭 또는 더블클릭 시 대표 사진 변경 안내';
-    img.addEventListener('dblclick', function () {
-      let isHidden = false;
-      photoActionBars.forEach(function (bar) {
-        if (bar.style.display === 'none') {
-          bar.style.display = 'flex';
-          isHidden = true;
-        } else {
-          bar.style.display = 'none';
-        }
-      });
-      try {
-        if (isHidden) {
-          localStorage.removeItem('hide_profile_upload_btn');
-          showToast('대표 사진 등록 버튼이 표시되었습니다.');
-        } else {
-          localStorage.setItem('hide_profile_upload_btn', 'true');
-        }
-      } catch (err) {}
+    img.title = '클릭하여 내 사진 직접 등록 / 변경';
+    img.addEventListener('click', function () {
+      const input = document.querySelector('.profile-upload-input');
+      if (input) input.click();
     });
 
     // 이미지 로드 실패 시 공식 인증 엠블럼으로 자동 전환
