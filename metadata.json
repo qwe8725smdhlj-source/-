@@ -1,0 +1,6 @@
+{
+  "name": "김병수 손해사정사무소",
+  "description": "독립 신체손해사정사 김병수 손해사정사무소 공식 웹사이트. 배상책임보험(특화), 사망사고·중상해(핵심강점), 후유장해, 질병수술·입원, 산재·교통사고 신체 손해사정. 전국 무료 상담.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
