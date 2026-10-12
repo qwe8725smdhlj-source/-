@@ -89,9 +89,117 @@ document.addEventListener('DOMContentLoaded', function () {
     return el;
   }
 
-  // 4. 프로필 사진 관리 (영구 파일 및 로컬 사진 동기화)
+  // 4. 프로필 사진 관리 (영구 파일 및 로컬 사진 동기화, 직접 등록 지원)
   const profileImgs = document.querySelectorAll('.profile-photo-img');
+  const uploadInputs = document.querySelectorAll('.profile-upload-input');
+  const hideBtns = document.querySelectorAll('.profile-hide-btn');
+  const photoActionBars = document.querySelectorAll('.profile-photo-actions');
 
+  // 버튼 숨김 상태 복원
+  try {
+    if (localStorage.getItem('hide_profile_upload_btn') === 'true') {
+      photoActionBars.forEach(function (bar) {
+        bar.style.display = 'none';
+      });
+    }
+  } catch (e) {}
+
+  // 버튼 숨기기 클릭 이벤트
+  hideBtns.forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      photoActionBars.forEach(function (bar) {
+        bar.style.display = 'none';
+      });
+      try {
+        localStorage.setItem('hide_profile_upload_btn', 'true');
+      } catch (err) {}
+      showToast('등록 버튼이 숨겨졌습니다. (다시 보이게 하려면 사진을 더블클릭하세요)');
+    });
+  });
+
+  // 사진 영역 더블클릭 시 숨겨진 등록 버튼 다시 표시 토글
+  profileImgs.forEach(function (img) {
+    img.style.cursor = 'pointer';
+    img.title = '클릭 또는 더블클릭 시 대표 사진 변경 안내';
+    img.addEventListener('dblclick', function () {
+      let isHidden = false;
+      photoActionBars.forEach(function (bar) {
+        if (bar.style.display === 'none') {
+          bar.style.display = 'flex';
+          isHidden = true;
+        } else {
+          bar.style.display = 'none';
+        }
+      });
+      try {
+        if (isHidden) {
+          localStorage.removeItem('hide_profile_upload_btn');
+          showToast('대표 사진 등록 버튼이 표시되었습니다.');
+        } else {
+          localStorage.setItem('hide_profile_upload_btn', 'true');
+        }
+      } catch (err) {}
+    });
+
+    // 이미지 로드 실패 시 공식 인증 엠블럼으로 자동 전환
+    img.addEventListener('error', function () {
+      if (!img.src.includes('profile-badge.svg')) {
+        img.src = '/images/profile-badge.svg';
+      }
+    });
+  });
+
+  // 파일 선택을 통한 본인 사진 등록
+  uploadInputs.forEach(function (input) {
+    input.addEventListener('change', function (e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        alert('이미지 파일(JPG, PNG 등)만 등록 가능합니다.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        const dataUrl = evt.target.result;
+        if (!dataUrl) return;
+
+        // 즉시 화면 반영
+        profileImgs.forEach(function (img) {
+          img.src = dataUrl;
+        });
+
+        try {
+          localStorage.setItem('user_profile_photo', dataUrl);
+        } catch (err) {}
+
+        showToast('사진을 서버로 영구 저장하는 중입니다...');
+
+        // 서버 파일로 영구 저장 (/public/images/profile-photo.jpg)
+        fetch('/api/save-profile-photo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dataUrl: dataUrl })
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data && data.success) {
+              showToast('✅ 대표 사진이 서버에 영구 저장되었습니다! 이제 재발행(배포)하셔도 사진이 완벽하게 유지됩니다.');
+            } else {
+              showToast('사진이 적용되었습니다.');
+            }
+          })
+          .catch(function () {
+            showToast('사진이 화면에 적용되었습니다.');
+          });
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  // 기존 저장된 본인 사진 동기화
   try {
     const savedUserPhoto = localStorage.getItem('user_profile_photo');
     if (savedUserPhoto) {

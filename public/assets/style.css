@@ -517,6 +517,24 @@ section {
   cursor: pointer;
 }
 
+.profile-hide-btn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.profile-hide-btn:hover {
+  background: #E2E8F0;
+  color: var(--text-dark);
+}
+
 /* --------------------------------------------------------------------------
    Trust Bar
    -------------------------------------------------------------------------- */
