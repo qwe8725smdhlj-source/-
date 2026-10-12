@@ -20,6 +20,31 @@ app.use((_req, res, next) => {
 const distDir = path.join(__dirname, 'dist');
 const publicDir = path.join(__dirname, 'public');
 
+// Endpoint to permanently save representative photo to disk if synchronized from client
+app.post('/api/save-profile-photo', express.json({ limit: '15mb' }), (req, res) => {
+  try {
+    const { dataUrl } = req.body;
+    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:image/')) {
+      const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      
+      const pubImgDir = path.join(publicDir, 'images');
+      if (!fs.existsSync(pubImgDir)) fs.mkdirSync(pubImgDir, { recursive: true });
+      fs.writeFileSync(path.join(pubImgDir, 'profile-photo.jpg'), buffer);
+
+      const distImgDir = path.join(distDir, 'images');
+      if (fs.existsSync(distDir)) {
+        if (!fs.existsSync(distImgDir)) fs.mkdirSync(distImgDir, { recursive: true });
+        fs.writeFileSync(path.join(distImgDir, 'profile-photo.jpg'), buffer);
+      }
+      return res.json({ success: true });
+    }
+    return res.status(400).json({ error: 'invalid data' });
+  } catch (err) {
+    return res.status(500).json({ error: 'failed to save' });
+  }
+});
+
 if (fs.existsSync(distDir)) {
   app.use(express.static(distDir, {
     etag: false,

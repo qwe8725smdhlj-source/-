@@ -89,77 +89,29 @@ document.addEventListener('DOMContentLoaded', function () {
     return el;
   }
 
-  // 4. 프로필 사진 관리 (사용자 본인 실제 사진 반영 및 영구 보존)
-  const photoInputs = document.querySelectorAll('.profile-file-input');
+  // 4. 프로필 사진 관리 (영구 파일 및 로컬 사진 동기화)
   const profileImgs = document.querySelectorAll('.profile-photo-img');
-  const resetBtns = document.querySelectorAll('.profile-reset-btn');
 
-  // 로컬 스토리지에 저장된 사용자 실제 사진이 있으면 즉시 반영
   try {
-    let savedUserPhoto = localStorage.getItem('user_profile_photo');
+    const savedUserPhoto = localStorage.getItem('user_profile_photo');
     if (savedUserPhoto) {
-      // 이전에 저장된 기본 엠블럼 SVG 또는 데이터 URL에 구버전 텍스트가 있을 경우 정화
-      if (savedUserPhoto.includes('G0001628') || savedUserPhoto.includes('profile-badge') || savedUserPhoto.includes('data:image/svg+xml')) {
-        localStorage.removeItem('user_profile_photo');
-        savedUserPhoto = null;
-      } else if (savedUserPhoto.includes('전국 어디든지 가능') || savedUserPhoto.includes('전국 어디든지') || savedUserPhoto.includes('어디든지')) {
-        savedUserPhoto = savedUserPhoto.replace(/전국\s*어디(든지|를\s*가나|나)\s*가능/g, '전국 어디든 가능')
-                                       .replace(/전국\s*어디든지/g, '전국 어디든')
-                                       .replace(/어디든지/g, '어디든');
-        localStorage.setItem('user_profile_photo', savedUserPhoto);
-      }
-      if (savedUserPhoto) {
+      if (savedUserPhoto.startsWith('data:image/')) {
         profileImgs.forEach(function (img) {
           img.src = savedUserPhoto;
         });
-        resetBtns.forEach(function (btn) {
-          btn.style.display = 'inline-block';
-        });
+        // 서버 파일로 영구 저장 동기화
+        fetch('/api/save-profile-photo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dataUrl: savedUserPhoto })
+        }).catch(function () {});
+      } else if (savedUserPhoto.includes('profile-badge')) {
+        localStorage.removeItem('user_profile_photo');
       }
     }
   } catch (e) {
     // 로컬 스토리지 비활성화 시 무시
   }
-
-  photoInputs.forEach(function (input) {
-    input.addEventListener('change', function (e) {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function (evt) {
-        const dataUrl = evt.target.result;
-        profileImgs.forEach(function (img) {
-          img.src = dataUrl;
-        });
-        resetBtns.forEach(function (btn) {
-          btn.style.display = 'inline-block';
-        });
-        try {
-          localStorage.setItem('user_profile_photo', dataUrl);
-        } catch (err) {
-          console.warn('LocalStorage limit reached', err);
-        }
-        showToast('본인 사진이 성공적으로 등록되었습니다.');
-      };
-      reader.readAsDataURL(file);
-    });
-  });
-
-  resetBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      try {
-        localStorage.removeItem('user_profile_photo');
-      } catch (e) {}
-      profileImgs.forEach(function (img) {
-        img.src = '/images/profile-badge.svg?v=20261012b';
-      });
-      resetBtns.forEach(function (b) {
-        b.style.display = 'none';
-      });
-      showToast('공식 공인 등록증 엠블럼으로 재설정되었습니다.');
-    });
-  });
 
   // 5. 업무 지역 표기 통일 보장 ('전국 어디든 가능')
   function normalizeRegionText() {

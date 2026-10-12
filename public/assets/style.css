@@ -467,8 +467,10 @@ section {
 .profile-img-wrap img {
   width: 100%;
   height: auto;
+  aspect-ratio: 3 / 4;
   display: block;
   object-fit: cover;
+  object-position: center 15%;
 }
 
 .profile-caption {
