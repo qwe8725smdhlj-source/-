@@ -1,80 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>[홈페이지 주소]/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/consent/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/consent/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/services/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/services/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/services/liability/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/services/liability/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/services/death/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/services/death/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/services/disability/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/services/disability/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/services/medical/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/services/medical/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/services/industrial/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/services/industrial/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/services/traffic/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/services/traffic/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/process/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/process/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/faq/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/faq/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/about/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/about/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>[홈페이지 주소]/privacy/</loc>
-    <lastmod>2026-10-08</lastmod>
+    <loc>https://qwe8725.netlify.app/privacy/</loc>
+    <lastmod>2026-10-23</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

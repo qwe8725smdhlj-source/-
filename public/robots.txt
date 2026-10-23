@@ -13,4 +13,4 @@ Allow: /
 User-agent: OAI-SearchBot
 Allow: /
 
-Sitemap: [홈페이지 주소]/sitemap.xml
+Sitemap: https://qwe8725.netlify.app/sitemap.xml
