@@ -14,3 +14,5 @@ User-agent: OAI-SearchBot
 Allow: /
 
 Sitemap: https://qwe8725.netlify.app/sitemap.xml
+
+#DaumWebMasterTool:014b3a9fcfec08878e892c9141067ab51c42135092b6473faaad6add26e558b5:WoYFtMaR84eZ7MaX1Xjw9A==
